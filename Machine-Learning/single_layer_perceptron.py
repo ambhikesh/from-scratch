@@ -18,7 +18,7 @@ class Perceptron:
         return self.sigmoid(x) * (1 - self.sigmoid(x))
 
     def train(self, num_epochs=25000) -> None:
-        for epoch in range(num_epochs):
+        for _ in range(num_epochs):
             indices = np.arange(self.num_samples)
             np.random.shuffle(indices)
             shuffled_inputs = self.input_set[indices]
@@ -53,7 +53,7 @@ class Perceptron:
 input_set = np.array([[0, 0, 1], [0, 1, 1], [1, 0, 1], [1, 1, 1]])
 labels = np.array([[0], [0], [0], [1]])
 perceptron = Perceptron(input_set, labels)
-perceptron.train(num_epochs=5000)
+perceptron.train(num_epochs=850)
 perceptron.plot(perceptron.errors)
 
 #testing
@@ -62,6 +62,10 @@ expected_outputs = np.array([[0], [0], [0], [1]])
 
 for i in range(len(test_inputs)):
     predicted_output = perceptron.predict(test_inputs[i])
+    if(predicted_output<0.5):
+        output = 0
+    else:
+        output = 1
     expected_output = expected_outputs[i]
     
-    print(f"Input: {test_inputs[i]}, Predicted: {predicted_output}, Expected: {expected_output}")
+    print(f"Input: {test_inputs[i]}, Predicted: {[output]}, Expected: {expected_output}")

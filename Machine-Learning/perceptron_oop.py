@@ -53,7 +53,7 @@ class Perceptron:
 input_set = np.array([[0, 0, 1], [0, 1, 1], [1, 0, 1], [1, 1, 1]])
 labels = np.array([[0], [0], [0], [1]])
 perceptron = Perceptron(input_set, labels)
-perceptron.train(num_epochs=5000)
+perceptron.train(num_epochs=500)
 perceptron.plot(perceptron.errors)
 
 #testing

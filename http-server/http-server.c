@@ -76,7 +76,6 @@ int main(){
         char response[61+content_length];
         snprintf(response,sizeof(response),"HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length:%ld\n\n%s",content_length, file_data);
         printf("%s", response);
-        printf("test");
         
         //write(new_socket, response, strlen(response));
         write(new_socket, response,61+content_length);

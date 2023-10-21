@@ -4,8 +4,11 @@
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <string.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 int main(){
     struct sockaddr_in address;
@@ -33,25 +36,52 @@ int main(){
         exit(EXIT_FAILURE);
     }
 
-    int new_socket = accept(server_fd, (struct sockaddr*)&address, (socklen_t*)&addrlen);
-    if(new_socket<0){
-        perror("cannot create new socket\n");
-        exit(EXIT_FAILURE);
-    }
+    while(1){
+        printf("---Waiting for connection---\n");
+        int new_socket = accept(server_fd, (struct sockaddr*)&address, (socklen_t*)&addrlen);
+        if(new_socket<0){
+            perror("cannot create new socket\n");
+            exit(EXIT_FAILURE);
+        }
+        
+        char buffer[1024] = {0};
     
-    char buffer[1024] = {0};
+        int valread = read(new_socket, buffer, 1024);
+        if(valread<0){
+            printf("No bytes to read\n");
+        }
+        
+        char filename[1024];
+        sscanf(buffer, "GET /%s HTTP/1.1", filename);
+        printf("GET %s HTTP/1.1\n",filename);
+        int file_fd = open(filename, O_RDONLY);
+        if(file_fd<0){
+            char *response = "HTTP/1.1 404 NOT FOUND";
+            write(new_socket, response, strlen(response));
+            close(new_socket);
+            continue;
+        }
+        
+        printf("Hello\n");
+        off_t file_size = lseek(file_fd, 0, SEEK_END);
+        lseek(file_fd, 0, SEEK_SET);
 
-    int valread = read(new_socket, buffer, 1024);
-    printf("%s\n",buffer);
-    if(valread<0){
-        printf("No bytes to read\n");
-    }
+        char *file_data = (char *)malloc(file_size);
 
-    char *hello = "I am server!\n";
-    write(new_socket, hello, strlen(hello));
-
-    close(new_socket);
-
+        ssize_t content_length = read(file_fd, file_data, file_size);
+        if(content_length==-1){
+            char *response = "HTTP/1.1 404 NOT FOUND";
+            write(new_socket, response, strlen(response));
+        }
+        char response[61+content_length];
+        snprintf(response,sizeof(response),"HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length:%ld\n\n%s",content_length, file_data);
+        printf("%s", response);
+        printf("test");
+        
+        //write(new_socket, response, strlen(response));
+        write(new_socket, response,61+content_length);
+        close(new_socket);
+        }
     return 0;
     
 }

@@ -56,7 +56,7 @@ int main(){
         printf("GET %s HTTP/1.1\n",filename);
         int file_fd = open(filename, O_RDONLY);
         if(file_fd<0){
-            char *response = "HTTP/1.1 404 NOT FOUND";
+            char *response = "HTTP/1.1 404 NOT FOUND\r\n\r\n";
             write(new_socket, response, strlen(response));
             close(new_socket);
             continue;
@@ -69,10 +69,6 @@ int main(){
         char *file_data = (char *)malloc(file_size);
 
         ssize_t content_length = read(file_fd, file_data, file_size);
-        if(content_length==-1){
-            char *response = "HTTP/1.1 404 NOT FOUND";
-            write(new_socket, response, strlen(response));
-        }
         char response[61+content_length];
         snprintf(response,sizeof(response),"HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length:%ld\n\n%s",content_length, file_data);
         printf("%s", response);
